@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bulky.WebUI", "Bulky.WebUI\Bulky.WebUI.csproj", "{0C42DC13-A8AB-4DEE-A1AF-39E19F613C5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bulky.WebRazor", "Bulky.WebRazor\Bulky.WebRazor.csproj", "{BBD54EA9-9ED7-4416-A97B-7FB0FB0EC97F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0C42DC13-A8AB-4DEE-A1AF-39E19F613C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C42DC13-A8AB-4DEE-A1AF-39E19F613C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C42DC13-A8AB-4DEE-A1AF-39E19F613C5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBD54EA9-9ED7-4416-A97B-7FB0FB0EC97F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBD54EA9-9ED7-4416-A97B-7FB0FB0EC97F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBD54EA9-9ED7-4416-A97B-7FB0FB0EC97F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBD54EA9-9ED7-4416-A97B-7FB0FB0EC97F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
