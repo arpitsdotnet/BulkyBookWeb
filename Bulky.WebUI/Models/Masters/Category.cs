@@ -10,8 +10,10 @@ public class Category
 
     [Required]
     [DisplayName("Category Name")]
+    [MaxLength(30, ErrorMessage = "Category Name is required.")]
     public string CategoryName { get; set; }
 
     [DisplayName("Display Order")]
+    [Range(1, 100, ErrorMessage = "Display Order must be between 1 and 100.")]
     public int CategoryDisplayOrder { get; set; }
 }

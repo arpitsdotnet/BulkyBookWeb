@@ -24,4 +24,17 @@ public class CategoryController : Controller
     {
         return View();
     }
+
+    [HttpPost]
+    public IActionResult Create(Category category)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(category);
+        }
+
+        _dbContext.Categories.Add(category);
+        _dbContext.SaveChanges();
+        return RedirectToAction("Index");
+    }
 }
