@@ -1,5 +1,5 @@
-﻿using Bulky.WebUI.Data.Base;
-using Bulky.WebUI.Models.Masters;
+﻿using Bulky.DataAccess.Base;
+using Bulky.Models.Masters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bulky.WebUI.Controllers.Masters;

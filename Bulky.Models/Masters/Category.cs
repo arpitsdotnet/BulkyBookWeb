@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Bulky.WebUI.Models.Masters;
+namespace Bulky.Models.Masters;
 
 public class Category
 {
