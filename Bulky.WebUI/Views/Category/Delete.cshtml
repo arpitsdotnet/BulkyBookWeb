@@ -5,7 +5,7 @@
     <div class="container">
         <div class="row pt-4 pb-3">
             <div class="col-6">
-                <h2 class="text-primary">Edit Category</h2>
+                <h2 class="text-primary">Delete Category</h2>
             </div>
             <div class="col-6 text-end">
             </div>
@@ -14,26 +14,18 @@
     </div>
     <div class="mb-3 row">
         <label asp-for="CategoryName" class="p-0"></label>
-        <input asp-for="CategoryName" class="form-control" />
-        <span asp-validation-for="CategoryName" class="text-danger"></span>
+        <input asp-for="CategoryName" disabled="disabled" class="form-control" />
     </div>
     <div class="mb-3 row">
         <label asp-for="CategoryDisplayOrder" class="p-0"></label>
-        <input asp-for="CategoryDisplayOrder" class="form-control" />
-        <span asp-validation-for="CategoryDisplayOrder" class="text-danger"></span>
+        <input asp-for="CategoryDisplayOrder" disabled="disabled" class="form-control" />
     </div>
     <div class="row">
         <div class="col-6 col-md-3">
-            <button type="submit" class="btn btn-primary form-control">Update</button>
+            <button type="submit" class="btn btn-danger form-control">Delete</button>
         </div>
         <div class="col-6 col-md-3">
             <a asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
         </div>
     </div>
 </form>
-
-@section Scripts {
-    @{
-        <partial name="_ValidationScriptsPartial" />
-    }
-}

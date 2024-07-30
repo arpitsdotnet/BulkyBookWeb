@@ -75,4 +75,33 @@ public class CategoryController : Controller
         _dbContext.SaveChanges();
         return RedirectToAction("Index");
     }
+
+    public IActionResult Delete(int? categoryId)
+    {
+        if (categoryId is null or 0)
+            return NotFound();
+
+        //Category? category = _dbContext.Categories.Find(categoryId);
+        Category? category = _dbContext.Categories.FirstOrDefault(x => x.CategoryId == categoryId);
+        if (category == null)
+            return NotFound();
+
+        return View(category);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public IActionResult DeletePOST(int? categoryId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View();
+        }
+        Category? category = _dbContext.Categories.FirstOrDefault(x => x.CategoryId == categoryId);
+        if (category == null)
+            return NotFound();
+
+        _dbContext.Categories.Remove(category);
+        _dbContext.SaveChanges();
+        return RedirectToAction("Index");
+    }
 }
