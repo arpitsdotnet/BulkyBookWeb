@@ -41,6 +41,9 @@ public class CategoryController : Controller
 
         _dbContext.Categories.Add(category);
         _dbContext.SaveChanges();
+
+        TempData["Success"] = "Category created successfully.";
+
         return RedirectToAction("Index");
     }
 
@@ -73,6 +76,9 @@ public class CategoryController : Controller
 
         _dbContext.Categories.Update(category);
         _dbContext.SaveChanges();
+
+        TempData["Success"] = "Category updated successfully.";
+
         return RedirectToAction("Index");
     }
 
@@ -102,6 +108,9 @@ public class CategoryController : Controller
 
         _dbContext.Categories.Remove(category);
         _dbContext.SaveChanges();
+
+        TempData["Success"] = "Category deleted successfully.";
+
         return RedirectToAction("Index");
     }
 }
