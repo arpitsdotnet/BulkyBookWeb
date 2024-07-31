@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Bulky.DataAccess.Abstracts;
-internal interface IRepository<T> where T:class
+public interface IRepository<T> where T:class
 {
     IEnumerable<T> GetAll();
     T GetFirstOfDefault(Expression<Func<T,bool>> filter);

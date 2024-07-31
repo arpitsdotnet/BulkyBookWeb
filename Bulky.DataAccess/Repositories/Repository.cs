@@ -4,7 +4,7 @@ using Bulky.DataAccess.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bulky.DataAccess.Repositories;
-internal class Repository<T> : IRepository<T> where T : class
+public class Repository<T> : IRepository<T> where T : class
 {
     internal DbSet<T> dbSet { get; set; }
 
