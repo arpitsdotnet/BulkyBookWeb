@@ -1,5 +1,7 @@
+using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.DataAccess.Abstracts.Masters;
 using BulkyBook.DataAccess.Base;
+using BulkyBook.DataAccess.Repositories;
 using BulkyBook.DataAccess.Repositories.Masters;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

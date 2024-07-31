@@ -12,11 +12,6 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
         _dbContext = dbContext;
     }
 
-    public void SaveChanges()
-    {
-        _dbContext.SaveChanges();
-    }
-
     public void Update(Category category)
     {
         _dbContext.Categories.Update(category);

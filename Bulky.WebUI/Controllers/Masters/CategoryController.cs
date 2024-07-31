@@ -1,4 +1,5 @@
-﻿using BulkyBook.DataAccess.Abstracts.Masters;
+﻿using BulkyBook.DataAccess.Abstracts;
+using BulkyBook.DataAccess.Abstracts.Masters;
 using BulkyBook.DataAccess.Base;
 using BulkyBook.Models.Masters;
 using Microsoft.AspNetCore.Mvc;
@@ -6,17 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace BulkyBook.WebUI.Controllers.Masters;
 public class CategoryController : Controller
 {
-    private readonly ICategoryRepository _categoryRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CategoryController(
-        ICategoryRepository categoryRepo
+        IUnitOfWork unitOfWork
         )
     {
-        _categoryRepo = categoryRepo;
+        _unitOfWork = unitOfWork;
     }
     public IActionResult Index()
     {
-        IEnumerable<Category> categories = _categoryRepo.GetAll();
+        IEnumerable<Category> categories = _unitOfWork.Category.GetAll();
 
         return View(categories);
     }
@@ -40,7 +41,7 @@ public class CategoryController : Controller
             return View(category);
         }
 
-        var existingcategory = _categoryRepo.GetFirstOrDefault(x => x.CategoryName == category.CategoryName);
+        var existingcategory = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryName == category.CategoryName);
         if (existingcategory != null && existingcategory.CategoryName == category.CategoryName)
         {
             ModelState.AddModelError(nameof(category.CategoryName), "Category Name already exists.");
@@ -48,8 +49,8 @@ public class CategoryController : Controller
         }
 
 
-        _categoryRepo.Add(category);
-        _categoryRepo.SaveChanges();
+        _unitOfWork.Category.Add(category);
+        _unitOfWork.SaveChanges();
 
         TempData["Success"] = "Category created successfully.";
 
@@ -62,7 +63,7 @@ public class CategoryController : Controller
             return NotFound();
 
         //Category? category = _dbContext.Categories.Find(categoryId);
-        Category? category = _categoryRepo.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
@@ -83,8 +84,8 @@ public class CategoryController : Controller
             return View(category);
         }
 
-        _categoryRepo.Update(category);
-        _categoryRepo.SaveChanges();
+        _unitOfWork.Category.Update(category);
+        _unitOfWork.SaveChanges();
 
         TempData["Success"] = "Category updated successfully.";
 
@@ -97,7 +98,7 @@ public class CategoryController : Controller
             return NotFound();
 
         //Category? category = _dbContext.Categories.Find(categoryId);
-        Category? category = _categoryRepo.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
@@ -111,12 +112,12 @@ public class CategoryController : Controller
         {
             return View();
         }
-        Category? category = _categoryRepo.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
-        _categoryRepo.Remove(category);
-        _categoryRepo.SaveChanges();
+        _unitOfWork.Category.Remove(category);
+        _unitOfWork.SaveChanges();
 
         TempData["Success"] = "Category deleted successfully.";
 
