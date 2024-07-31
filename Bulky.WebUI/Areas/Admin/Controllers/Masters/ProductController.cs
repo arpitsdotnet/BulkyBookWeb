@@ -40,7 +40,8 @@ public class ProductController : Controller
                 Value = u.CategoryId.ToString()
             });
 
-        ViewBag.CategoryList = CategoryList;
+        //ViewBag.CategoryList = CategoryList;
+        ViewData["CategoryList"] = CategoryList;
 
         return View();
     }
