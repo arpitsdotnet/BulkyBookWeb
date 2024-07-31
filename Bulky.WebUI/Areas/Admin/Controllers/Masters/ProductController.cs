@@ -1,6 +1,7 @@
 ﻿using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyBook.WebUI.Areas.Admin.Controllers.Masters;
 
@@ -18,11 +19,29 @@ public class ProductController : Controller
     {
         IEnumerable<Product> products = _unitOfWork.Product.GetAll();
 
+        //IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().
+        //    Select(u => new SelectListItem
+        //    {
+        //        Text = u.CategoryName,
+        //        Value = u.CategoryId.ToString()
+        //    });
+
+        //ViewBag.CategoryList = CategoryList;
+
         return View(products);
     }
 
     public IActionResult Create()
     {
+        IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().
+            Select(u => new SelectListItem
+            {
+                Text = u.CategoryName,
+                Value = u.CategoryId.ToString()
+            });
+
+        ViewBag.CategoryList = CategoryList;
+
         return View();
     }
 
