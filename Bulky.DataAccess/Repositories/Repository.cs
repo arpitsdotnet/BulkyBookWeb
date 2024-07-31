@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
-using Bulky.DataAccess.Abstracts;
-using Bulky.DataAccess.Base;
+using BulkyBook.DataAccess.Abstracts;
+using BulkyBook.DataAccess.Base;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bulky.DataAccess.Repositories;
+namespace BulkyBook.DataAccess.Repositories;
 public class Repository<T> : IRepository<T> where T : class
 {
     internal DbSet<T> dbSet { get; set; }

@@ -1,8 +1,8 @@
-﻿using Bulky.DataAccess.Abstracts.Masters;
-using Bulky.DataAccess.Base;
-using Bulky.Models.Masters;
+﻿using BulkyBook.DataAccess.Abstracts.Masters;
+using BulkyBook.DataAccess.Base;
+using BulkyBook.Models.Masters;
 
-namespace Bulky.DataAccess.Repositories.Masters;
+namespace BulkyBook.DataAccess.Repositories.Masters;
 public class CategoryRepository : Repository<Category>, ICategoryRepository
 {
     private readonly ApplicationDbContext _dbContext;

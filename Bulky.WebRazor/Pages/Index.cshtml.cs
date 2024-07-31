@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Bulky.WebRazor.Pages;
+namespace BulkyBook.WebRazor.Pages;
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;

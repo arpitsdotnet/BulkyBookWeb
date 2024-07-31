@@ -1,9 +1,9 @@
-using Bulky.WebRazor.Data.Base;
-using Bulky.WebRazor.Models.Masters;
+using BulkyBook.WebRazor.Data.Base;
+using BulkyBook.WebRazor.Models.Masters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Bulky.WebRazor.Pages.Categories;
+namespace BulkyBook.WebRazor.Pages.Categories;
 
 public class CreateModel : PageModel
 {

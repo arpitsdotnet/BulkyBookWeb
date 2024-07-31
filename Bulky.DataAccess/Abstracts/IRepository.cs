@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bulky.DataAccess.Abstracts;
+namespace BulkyBook.DataAccess.Abstracts;
 public interface IRepository<T> where T:class
 {
     IEnumerable<T> GetAll();

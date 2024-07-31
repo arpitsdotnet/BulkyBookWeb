@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using Bulky.WebUI.Models;
+using BulkyBook.WebUI.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Bulky.WebUI.Controllers;
+namespace BulkyBook.WebUI.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;

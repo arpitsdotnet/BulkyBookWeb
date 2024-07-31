@@ -1,7 +1,7 @@
-﻿using Bulky.WebRazor.Models.Masters;
+﻿using BulkyBook.WebRazor.Models.Masters;
 using Microsoft.EntityFrameworkCore;
 
-namespace Bulky.WebRazor.Data.Base;
+namespace BulkyBook.WebRazor.Data.Base;
 
 public class ApplicationDbContext : DbContext
 {

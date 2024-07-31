@@ -1,6 +1,6 @@
-using Bulky.DataAccess.Abstracts.Masters;
-using Bulky.DataAccess.Base;
-using Bulky.DataAccess.Repositories.Masters;
+using BulkyBook.DataAccess.Abstracts.Masters;
+using BulkyBook.DataAccess.Base;
+using BulkyBook.DataAccess.Repositories.Masters;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
