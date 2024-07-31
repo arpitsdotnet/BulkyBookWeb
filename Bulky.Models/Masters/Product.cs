@@ -46,7 +46,10 @@ public class Product
     [Range(1, 10000)]
     public double Price100 { get; set; }
 
+    [Required]
+    [DisplayName("Category")]
     public int CategoryId { get; set; }
+
     [ForeignKey(nameof(CategoryId))]
     [ValidateNever]
     public Category Category { get; set; }

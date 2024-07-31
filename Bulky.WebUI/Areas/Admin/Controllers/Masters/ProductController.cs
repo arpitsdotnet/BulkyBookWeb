@@ -20,16 +20,77 @@ public class ProductController : Controller
     {
         IEnumerable<Product> products = _unitOfWork.Product.GetAll();
 
-        //IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().
-        //    Select(u => new SelectListItem
-        //    {
-        //        Text = u.CategoryName,
-        //        Value = u.CategoryId.ToString()
-        //    });
+        IEnumerable<Category> categoryList = _unitOfWork.Category.GetAll();
 
-        //ViewBag.CategoryList = CategoryList;
+        foreach (var item in products)
+        {
+            item.Category = categoryList.FirstOrDefault(x => x.CategoryId == item.CategoryId);
+        }
 
         return View(products);
+    }
+
+    public IActionResult Upsert(int? id)
+    {
+        //ViewBag.CategoryList = CategoryList;
+        //ViewData["CategoryList"] = CategoryList;
+        ProductVM productVM = new()
+        {
+            Product = new Product(),
+            CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                })
+        };
+
+        if (id is null or 0)
+        {
+            //create
+            return View(productVM);
+        }
+
+        //update
+        productVM.Product = _unitOfWork.Product.GetFirstOrDefault(x => x.Id == id);
+        return View(productVM);
+    }
+
+    [HttpPost]
+    public IActionResult Upsert(ProductVM productVM, IFormFile? file)
+    {
+        if (!ModelState.IsValid)
+        {
+            productVM.CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                });
+
+            return View(productVM);
+        }
+
+        var existingProduct = _unitOfWork.Product.GetFirstOrDefault(x => x.ISBN == productVM.Product.ISBN);
+        if (existingProduct != null)
+        {
+            productVM.CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                });
+
+            ModelState.AddModelError(nameof(productVM.Product.ISBN), "ISBN number already exists.");
+            return View(productVM);
+        }
+
+        _unitOfWork.Product.Add(productVM.Product);
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Product created successfully.";
+
+        return RedirectToAction("Index");
     }
 
     public IActionResult Create()
