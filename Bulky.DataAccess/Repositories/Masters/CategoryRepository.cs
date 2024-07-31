@@ -12,7 +12,7 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
         _dbContext = dbContext;
     }
 
-    public void Save()
+    public void SaveChanges()
     {
         _dbContext.SaveChanges();
     }
