@@ -1,5 +1,6 @@
 ﻿using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
+using BulkyBook.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -33,35 +34,52 @@ public class ProductController : Controller
 
     public IActionResult Create()
     {
-        IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().
-            Select(u => new SelectListItem
-            {
-                Text = u.CategoryName,
-                Value = u.CategoryId.ToString()
-            });
-
         //ViewBag.CategoryList = CategoryList;
-        ViewData["CategoryList"] = CategoryList;
+        //ViewData["CategoryList"] = CategoryList;
+        ProductVM productVM = new()
+        {
+            Product = new Product(),
+            CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                })
+        };
 
-        return View();
+        return View(productVM);
     }
 
     [HttpPost]
-    public IActionResult Create(Product product)
+    public IActionResult Create(ProductVM productVM)
     {
         if (!ModelState.IsValid)
         {
-            return View(product);
+            productVM.CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                });
+
+            return View(productVM);
         }
 
-        var existingProduct = _unitOfWork.Product.GetFirstOrDefault(x => x.ISBN == product.ISBN);
+        var existingProduct = _unitOfWork.Product.GetFirstOrDefault(x => x.ISBN == productVM.Product.ISBN);
         if (existingProduct != null)
         {
-            ModelState.AddModelError(nameof(product.ISBN), "ISBN number already exists.");
-            return View();
+            productVM.CategoryList = _unitOfWork.Category.GetAll().
+                Select(u => new SelectListItem
+                {
+                    Text = u.CategoryName,
+                    Value = u.CategoryId.ToString()
+                });
+
+            ModelState.AddModelError(nameof(productVM.Product.ISBN), "ISBN number already exists.");
+            return View(productVM);
         }
 
-        _unitOfWork.Product.Add(product);
+        _unitOfWork.Product.Add(productVM.Product);
         _unitOfWork.SaveChanges();
 
         TempData["Success"] = "Product created successfully.";
