@@ -9,11 +9,14 @@ namespace BulkyBook.WebUI.Areas.Admin.Controllers.Masters;
 [Area("Admin")]
 public class ProductController : Controller
 {
+    private const string Product_Image_Path = @"images\products";
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public ProductController(IUnitOfWork unitOfWork)
+    public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
     {
         _unitOfWork = unitOfWork;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public IActionResult Index()
@@ -59,6 +62,7 @@ public class ProductController : Controller
     [HttpPost]
     public IActionResult Upsert(ProductVM productVM, IFormFile? file)
     {
+        //Check for Model Validations.
         if (!ModelState.IsValid)
         {
             productVM.CategoryList = _unitOfWork.Category.GetAll().
@@ -71,6 +75,7 @@ public class ProductController : Controller
             return View(productVM);
         }
 
+        //Check if ISBN Already Exists.
         var existingProduct = _unitOfWork.Product.GetFirstOrDefault(x => x.ISBN == productVM.Product.ISBN);
         if (existingProduct != null)
         {
@@ -83,6 +88,19 @@ public class ProductController : Controller
 
             ModelState.AddModelError(nameof(productVM.Product.ISBN), "ISBN number already exists.");
             return View(productVM);
+        }
+
+        string wwwRootPath = _webHostEnvironment.WebRootPath;
+        if(file != null)
+        {
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var productPath = Path.Combine(wwwRootPath, Product_Image_Path);
+
+            using var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create);
+
+            file.CopyTo(fileStream);
+
+            productVM.Product.ImageUrl  = Path.Combine(Product_Image_Path, fileName);
         }
 
         _unitOfWork.Product.Add(productVM.Product);
