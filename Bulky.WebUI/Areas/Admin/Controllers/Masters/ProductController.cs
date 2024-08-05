@@ -50,7 +50,7 @@ public class ProductController : Controller
 
         //update
         productVM.Product = _unitOfWork.Product
-            .GetFirstOrDefault(x => x.Id == id);
+            .Get(x => x.Id == id);
         return View(productVM);
     }
 
@@ -72,7 +72,7 @@ public class ProductController : Controller
 
         //Check if ISBN Already Exists.
         var existingProduct = _unitOfWork.Product
-            .GetFirstOrDefault(x => x.Id != productVM.Product.Id && x.ISBN == productVM.Product.ISBN);
+            .Get(x => x.Id != productVM.Product.Id && x.ISBN == productVM.Product.ISBN);
         if (existingProduct != null)
         {
             productVM.CategoryList = _unitOfWork.Category.GetAll().
@@ -259,7 +259,7 @@ public class ProductController : Controller
     [HttpDelete]
     public IActionResult Delete(int? id)
     {
-        Product? product = _unitOfWork.Product.GetFirstOrDefault(x => x.Id == id);
+        Product? product = _unitOfWork.Product.Get(x => x.Id == id);
         if (product == null)
             return Json(new { success = false, message = "Error while deleting, product id not found." });
 

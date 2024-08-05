@@ -41,7 +41,7 @@ public class CategoryController : Controller
             return View(category);
         }
 
-        var existingcategory = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryName == category.CategoryName);
+        var existingcategory = _unitOfWork.Category.Get(x => x.CategoryName == category.CategoryName);
         if (existingcategory != null && existingcategory.CategoryName == category.CategoryName)
         {
             ModelState.AddModelError(nameof(category.CategoryName), "Category Name already exists.");
@@ -63,7 +63,7 @@ public class CategoryController : Controller
             return NotFound();
 
         //Category? category = _dbContext.Categories.Find(categoryId);
-        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.Get(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
@@ -98,7 +98,7 @@ public class CategoryController : Controller
             return NotFound();
 
         //Category? category = _dbContext.Categories.Find(categoryId);
-        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.Get(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
@@ -112,7 +112,7 @@ public class CategoryController : Controller
         {
             return View();
         }
-        Category? category = _unitOfWork.Category.GetFirstOrDefault(x => x.CategoryId == categoryId);
+        Category? category = _unitOfWork.Category.Get(x => x.CategoryId == categoryId);
         if (category == null)
             return NotFound();
 
