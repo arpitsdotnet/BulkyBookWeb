@@ -13,7 +13,7 @@
     </div>
 </div>
 
-<table class="table table-bordered table-dark table-sm table-striped table-hover" style="width:100%;">
+@* <table id="tblData" class="table table-bordered table-dark table-sm table-striped table-hover" style="width:100%;">
     <thead>
         <tr>
             <th>Title</th>
@@ -32,7 +32,7 @@
                 <td>@item.ISBN</td>
                 <td>@item.ListPrice</td>
                 <td>@item.Author</td>
-                <td>@(item.Category != null ? @item.Category.CategoryName : "")</td>
+                <td>@item.Category.CategoryName</td>
                 <td>
                     <div class="w-75 btn-group" role="group">
                         <a asp-controller="Product" asp-action="Upsert" asp-route-Id="@item.Id" class="btn btn-primary mx-2">
@@ -46,4 +46,21 @@
             </tr>
         }
     </tbody>
+</table> *@
+<table id="tblData" class="table table-bordered table-dark table-sm table-striped table-hover text-nowrap" style="width:100%;">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>ISBN</th>
+            <th>List Price</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
 </table>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/product.js"></script>
+}
