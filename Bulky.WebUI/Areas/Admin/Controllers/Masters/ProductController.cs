@@ -1,12 +1,15 @@
 ﻿using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
 using BulkyBook.Models.ViewModels;
+using BulkyBook.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyBook.WebUI.Areas.Admin.Controllers.Masters;
 
 [Area("Admin")]
+[Authorize(Roles = SD.Role.Admin)]
 public class ProductController : Controller
 {
     private const string Product_Image_Path = @"images\products";
