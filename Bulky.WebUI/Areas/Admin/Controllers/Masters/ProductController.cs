@@ -256,6 +256,7 @@ public class ProductController : Controller
         return Json(new { data = products });
     }
 
+    [HttpDelete]
     public IActionResult Delete(int? id)
     {
         Product? product = _unitOfWork.Product.GetFirstOrDefault(x => x.Id == id);
@@ -277,7 +278,7 @@ public class ProductController : Controller
         _unitOfWork.Product.Remove(product);
         _unitOfWork.SaveChanges();
 
-        return Json(new { success = true, data = "Delete successfull." });
+        return Json(new { success = true, message = "Delete successful." });
     }
 
     #endregion
