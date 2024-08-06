@@ -43,7 +43,7 @@
                         <label asp-for="Input.ConfirmPassword"></label>
                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                     </div>
-                    <div class="form-floating mb-3 col-md-12">
+                    <div class="form-floating mb-3 col-md-6">
                         <input asp-for="Input.StreetAddress" class="form-control" autocomplete="StreetAddress" aria-required="true" placeholder="" />
                         <label asp-for="Input.StreetAddress"></label>
                         <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
@@ -66,6 +66,11 @@
                     <div class="form-floating mb-3 col-md-6">
                         <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-control">
                             <option disabled selected>-Select Role-</option>
+                        </select>
+                    </div>
+                    <div class="form-floating mb-3 col-md-6">
+                        <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-control" style="display:none;">
+                            <option disabled selected>-Select Company-</option>
                         </select>
                     </div>
                     <div class="col-md-12">
@@ -112,4 +117,15 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#Input_Role").change(function () {
+                var selection = $('#Input_Role option:selected').text();
+                $("#Input_CompanyId").hide();
+                if (selection == "Company") {
+                    $("#Input_CompanyId").show();
+                }
+            });
+        });
+    </script>
 }
