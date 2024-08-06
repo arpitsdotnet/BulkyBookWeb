@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using BulkyBook.DataAccess.Abstracts;
+using BulkyBook.Models.Masters;
 using BulkyBook.WebUI.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace BulkyBook.WebUI.Areas.Customer.Controllers;
 [Area("Customer")]
 public class HomeController : Controller
 {
+    private const int ShoppingCart_Default_Count = 1;
     private readonly ILogger<HomeController> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -30,7 +32,20 @@ public class HomeController : Controller
     {
         var product = _unitOfWork.Product.Get(u => u.Id == productId, nameof(_unitOfWork.Category));
 
-        return View(product);
+        if (product == null)
+        {
+            ModelState.AddModelError(nameof(product), "Unable to find the product");
+            return View();
+        }
+
+        var shoppingCart = new ShoppingCart
+        {
+            ProductId = productId,
+            Product = product,
+            Count = ShoppingCart_Default_Count,
+        };
+
+        return View(shoppingCart);
     }
 
     public IActionResult Privacy()
