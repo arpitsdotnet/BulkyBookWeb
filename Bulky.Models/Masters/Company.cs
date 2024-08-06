@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace BulkyBook.Models.Masters;
 public class Company
@@ -9,13 +10,16 @@ public class Company
     [Required]
     public string Name { get; set; }
 
+    [DisplayName("Street address")]
     public string? StreetAddress { get; set; }
 
     public string? City { get; set; }
 
-    public int? State { get; set; }
+    public string? State { get; set; }
 
-    public string? PostalCode { get; set; }
+    [DisplayName("Postal code")]
+    public int? PostalCode { get; set; }
 
+    [DisplayName("Phone number")]
     public string? PhoneNumber { get; set; }
 }

@@ -25,7 +25,9 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 
         CategorySeed(modelBuilder);
         ProductSeed(modelBuilder);
+        CompanySeed(modelBuilder);
     }
+
 
     private void CategorySeed(ModelBuilder modelBuilder)
     {
@@ -51,7 +53,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                 Price50 = 85,
                 Price100 = 80,
                 CategoryId = 1,
-                ImageUrl=""
+                ImageUrl = ""
             },
             new Product
             {
@@ -126,4 +128,39 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         );
     }
 
+    private void CompanySeed(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Company>().HasData(
+            new Company
+            {
+                Id = 1,
+                Name = "Tech Solutions",
+                StreetAddress = "123 Tech St.",
+                City = "Tech City",
+                State = "IL",
+                PostalCode = 123123,
+                PhoneNumber = "1231231231"
+            },
+            new Company
+            {
+                Id = 2,
+                Name = "Vivid Books",
+                StreetAddress = "999 Vid St",
+                City = "Vid City",
+                State = "IL",
+                PostalCode = 123123,
+                PhoneNumber = "8884448877"
+            },
+            new Company
+            {
+                Id = 3,
+                Name = "Readers Club",
+                StreetAddress = "999 Main St.",
+                City = "Tech City",
+                State = "NY",
+                PostalCode = 123123,
+                PhoneNumber = "4445555544"
+            }
+            );
+    }
 }
