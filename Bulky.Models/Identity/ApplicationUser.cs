@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using BulkyBook.Models.Masters;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace BulkyBook.Models.Identity;
 public class ApplicationUser : IdentityUser
@@ -16,5 +14,11 @@ public class ApplicationUser : IdentityUser
     public string? City { get; set; }
     public string? State { get; set; }
     public string? PostalCode { get; set; }
+
+    public int? CompanyId { get; set; }
+
+    [ForeignKey(nameof(CompanyId))]
+    [ValidateNever]
+    public Company Company { get; set; }
 
 }
