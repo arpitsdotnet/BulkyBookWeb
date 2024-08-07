@@ -72,7 +72,8 @@ public class CartController : Controller
         return View(ShoppingCartVM);
     }
 
-    [HttpPost(Name = "Summary")]
+    [HttpPost]
+    [ActionName("Summary")]
     public IActionResult SummaryPost()
     {
         var claimsIdentity = (ClaimsIdentity)User.Identity;
@@ -80,22 +81,17 @@ public class CartController : Controller
 
         ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(u =>
                                     u.ApplicationUserId == userId,
-                                    includeProperties: nameof(_unitOfWork.Product));        
+                                    includeProperties: nameof(_unitOfWork.Product));
 
         double orderTotal = ShoppingCartVM.ShoppingCartList.Sum(x => x.GetTotalPriceBasedOnQuantity());
 
+
+        ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
+        ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
+        ShoppingCartVM.OrderHeader.OrderTotal = orderTotal;
+
         var applicationUser = _unitOfWork.ApplicationUser.Get(u => u.Id == userId);
-
-        ShoppingCartVM.OrderHeader = new OrderHeader
-        {
-            OrderDate = DateTime.Now,
-            ApplicationUserId = userId,
-            ApplicationUser = applicationUser,
-            OrderTotal = orderTotal,
-            EstimatedArrivalDate = $"{DateTime.Now.AddDays(7).ToString(SD.DateFormat.Date)} - {DateTime.Now.AddDays(14).ToString(SD.DateFormat.Date)}"
-        };
-
-        if(applicationUser.CompanyId.GetValueOrDefault() == 0)
+        if (applicationUser.CompanyId.GetValueOrDefault() == 0)
         {
             //Regular customer account and capture payment
             ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatus.Pending;
@@ -124,7 +120,17 @@ public class CartController : Controller
             _unitOfWork.SaveChanges();
         }
 
-        return View(ShoppingCartVM);
+        if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+        {
+            //Regular customer account and capture payment via stripe pg
+        }
+
+        return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
+    }
+
+    public IActionResult OrderConfirmation(int id)
+    {
+        return View(id);
     }
 
     public IActionResult Plus(int cartId)
