@@ -13,6 +13,8 @@ public class OrderHeader
     [ValidateNever]
     public ApplicationUser ApplicationUser { get; set; }
 
+    public string EstimatedArrivalDate { get; set; }
+
     public DateTime OrderDate { get; set; }
     public DateTime ShippingDate { get; set; }
     public double OrderTotal { get; set; }

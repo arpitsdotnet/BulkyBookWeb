@@ -14,4 +14,9 @@ public class SD
         public const string Admin = "Admin";
         public const string Employee = "Employee";
     }
+    public class DateFormat
+    {
+        public const string Date = "dd-MMM-yyyy";
+        public const string Time = "hh:mm tt";
+    }
 }
