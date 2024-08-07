@@ -20,6 +20,7 @@ public class CartController : Controller
         _unitOfWork = unitOfWork;
     }
 
+    [BindProperty]
     public ShoppingCartVM ShoppingCartVM { get; set; }
 
     public IActionResult Index()
@@ -67,6 +68,61 @@ public class CartController : Controller
             OrderTotal = orderTotal,
             EstimatedArrivalDate = $"{DateTime.Now.AddDays(7).ToString(SD.DateFormat.Date)} - {DateTime.Now.AddDays(14).ToString(SD.DateFormat.Date)}"
         };
+
+        return View(ShoppingCartVM);
+    }
+
+    [HttpPost(Name = "Summary")]
+    public IActionResult SummaryPost()
+    {
+        var claimsIdentity = (ClaimsIdentity)User.Identity;
+        var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+        ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(u =>
+                                    u.ApplicationUserId == userId,
+                                    includeProperties: nameof(_unitOfWork.Product));        
+
+        double orderTotal = ShoppingCartVM.ShoppingCartList.Sum(x => x.GetTotalPriceBasedOnQuantity());
+
+        var applicationUser = _unitOfWork.ApplicationUser.Get(u => u.Id == userId);
+
+        ShoppingCartVM.OrderHeader = new OrderHeader
+        {
+            OrderDate = DateTime.Now,
+            ApplicationUserId = userId,
+            ApplicationUser = applicationUser,
+            OrderTotal = orderTotal,
+            EstimatedArrivalDate = $"{DateTime.Now.AddDays(7).ToString(SD.DateFormat.Date)} - {DateTime.Now.AddDays(14).ToString(SD.DateFormat.Date)}"
+        };
+
+        if(applicationUser.CompanyId.GetValueOrDefault() == 0)
+        {
+            //Regular customer account and capture payment
+            ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatus.Pending;
+            ShoppingCartVM.OrderHeader.OrderStatus = SD.OrderStatus.Pending;
+        }
+        else
+        {
+            //Company user account and payment can be delayed.
+            ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatus.DelayedPayment;
+            ShoppingCartVM.OrderHeader.OrderStatus = SD.OrderStatus.Approved;
+        }
+
+        _unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
+        _unitOfWork.SaveChanges();
+
+        foreach (var cartItem in ShoppingCartVM.ShoppingCartList)
+        {
+            OrderDetail orderDetail = new()
+            {
+                ProductId = cartItem.ProductId,
+                OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
+                Price = cartItem.Price,
+                Count = cartItem.Count
+            };
+            _unitOfWork.OrderDetail.Add(orderDetail);
+            _unitOfWork.SaveChanges();
+        }
 
         return View(ShoppingCartVM);
     }

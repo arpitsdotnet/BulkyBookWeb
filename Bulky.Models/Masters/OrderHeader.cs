@@ -13,8 +13,6 @@ public class OrderHeader
     [ValidateNever]
     public ApplicationUser ApplicationUser { get; set; }
 
-    public string EstimatedArrivalDate { get; set; }
-
     public DateTime OrderDate { get; set; }
     public DateTime ShippingDate { get; set; }
     public double OrderTotal { get; set; }
@@ -43,5 +41,8 @@ public class OrderHeader
     public string PostalCode { get; set; }
     [Required]
     public string Name { get; set; }
+
+    [NotMapped]
+    public string EstimatedArrivalDate { get; set; }
 
 }
