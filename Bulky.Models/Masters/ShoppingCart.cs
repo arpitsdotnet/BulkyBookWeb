@@ -22,17 +22,38 @@ public class ShoppingCart
     [ValidateNever]
     public ApplicationUser ApplicationUser { get; set; }
 
+    [NotMapped]
+    public double Price => GetPriceBasedOnQuantity();
+
     public void IncreaseCount(int count)
     {
         Count += count;
-        if (Count > 1000)
+        if (Count >= 1000)
             throw new ArgumentOutOfRangeException(nameof(Count));
     }
 
     public void DecreaseCount(int count)
     {
         Count -= count;
-        if (Count < 0)
+        if (Count <= 0)
             throw new ArgumentOutOfRangeException(nameof(Count));
+    }
+
+    public double GetPriceBasedOnQuantity()
+    {
+        if (Product == null)
+            return 0;
+
+        return Count switch
+        {
+            <= 50 => Product.Price,
+            <= 100 => Product.Price50,
+            _ => Product.Price100,
+        };
+    }
+
+    public double GetTotalPriceBasedOnQuantity()
+    {
+        return (Price * Count);
     }
 }

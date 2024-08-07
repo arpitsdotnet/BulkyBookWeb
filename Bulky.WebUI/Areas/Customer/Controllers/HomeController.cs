@@ -25,7 +25,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var products = _unitOfWork.Product.GetAll(nameof(_unitOfWork.Category));
+        var products = _unitOfWork.Product.GetAll(includeProperties: nameof(_unitOfWork.Category));
 
         return View(products);
     }
@@ -74,6 +74,8 @@ public class HomeController : Controller
         }
 
         _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Cart saved successfully.";
 
         return RedirectToAction(nameof(Index));
     }
