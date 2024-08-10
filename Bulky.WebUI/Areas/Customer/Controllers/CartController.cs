@@ -6,6 +6,8 @@ using BulkyBook.Models.ViewModels;
 using BulkyBook.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
+using Stripe.Tax;
 
 namespace BulkyBook.WebUI.Areas.Customer.Controllers;
 
@@ -107,12 +109,14 @@ public class CartController : Controller
         _unitOfWork.OrderHeader.Update(ShoppingCartVM.OrderHeader);
         _unitOfWork.SaveChanges();
 
+        var orderHeaderId = ShoppingCartVM.OrderHeader.Id;
+
         foreach (var cartItem in ShoppingCartVM.ShoppingCartList)
         {
             OrderDetail orderDetail = new()
             {
                 ProductId = cartItem.ProductId,
-                OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
+                OrderHeaderId = orderHeaderId,
                 Price = cartItem.Price,
                 Count = cartItem.Count
             };
@@ -120,16 +124,136 @@ public class CartController : Controller
             _unitOfWork.SaveChanges();
         }
 
-        if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+        if (applicationUser.CompanyId.GetValueOrDefault() != 0)
         {
-            //Regular customer account and capture payment via stripe pg
+            //Company account does not required payment for 30 days.
+            return RedirectToAction(nameof(OrderConfirmation), new { id = orderHeaderId });
         }
 
-        return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
+        //Regular customer account and capture payment via stripe pg
+        //Work To Do
+
+        var domain = "https://localhost:44331/";
+
+
+        var customerOptions = new CustomerCreateOptions
+        {
+            Name = "Jenny Rosen",
+            Address = new AddressOptions
+            {
+                Line1 = "510 Townsend St",
+                PostalCode = "98140",
+                City = "San Francisco",
+                State = "CA",
+                Country = "US",
+            },
+        };
+
+        //Code copied from: https://docs.stripe.com/tax/checkout?lang=dotnet
+        var options = new Stripe.Checkout.SessionCreateOptions
+        {
+            //LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+            //{
+            //    new Stripe.Checkout.SessionLineItemOptions
+            //    {
+            //        Price = "{{PRICE_ID}}",
+            //        Quantity = 2,
+            //    },
+            //},
+            LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
+            Mode = "payment",
+            SuccessUrl = $"{domain}Customer/Cart/OrderConfirmation?id={orderHeaderId}",
+            CancelUrl = $"{domain}Customer/Cart/OrderCancelled?id={orderHeaderId}",
+            AutomaticTax = new Stripe.Checkout.SessionAutomaticTaxOptions { Enabled = true }
+        };
+
+        foreach (var item in ShoppingCartVM.ShoppingCartList)
+        {
+            var sessionLineItem = new Stripe.Checkout.SessionLineItemOptions
+            {
+                PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                {
+                    UnitAmount = (long)item.Price * 100, //$20.50 => 2050
+                    Currency = "inr",
+                    ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = item.Product.Title
+                    }
+                },
+                Quantity = item.Count
+            };
+            options.LineItems.Add(sessionLineItem);
+        }
+
+        var service = new Stripe.Checkout.SessionService();
+        Stripe.Checkout.Session session = service.Create(options);
+
+        _unitOfWork.OrderHeader.UpdateStipePaymentID(orderHeaderId, session.Id, session.PaymentIntentId);
+        _unitOfWork.SaveChanges();
+
+        Response.Headers.Add("Location", session.Url);
+        return new StatusCodeResult(StatusCodes.Status303SeeOther);
+    }
+
+
+    static Calculation CalculateTax(long orderAmount, string currency)
+    {
+        var calculationCreateOptions = new CalculationCreateOptions
+        {
+            Currency = currency,
+            CustomerDetails = new CalculationCustomerDetailsOptions
+            {
+                Address = new AddressOptions
+                {
+                    Line1 = "920 5th Ave",
+                    City = "Seattle",
+                    State = "WA",
+                    PostalCode = "98104",
+                    Country = "US",
+                },
+                AddressSource = "shipping",
+            },
+            LineItems = new List<CalculationLineItemOptions> {
+                 new() {
+                    Amount = orderAmount,
+                    Reference = "ProductRef",
+                    TaxBehavior ="exclusive",
+                    TaxCode = "txcd_30011000"
+                }
+            },
+            ShippingCost = new CalculationShippingCostOptions { Amount = 300, TaxBehavior = "exclusive" },
+        };
+
+        var calculationService = new CalculationService();
+        var calculation = calculationService.Create(calculationCreateOptions);
+
+        return calculation;
     }
 
     public IActionResult OrderConfirmation(int id)
     {
+        OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == id, includeProperties: nameof(_unitOfWork.ApplicationUser));
+        if (orderHeader.PaymentStatus != SD.PaymentStatus.DelayedPayment)
+        {
+            //Order by Customer
+            var service = new Stripe.Checkout.SessionService();
+            Stripe.Checkout.Session session = service.Get(orderHeader.SessionId);
+
+            if (session.PaymentStatus.ToLower() == "paid")
+            {
+                _unitOfWork.OrderHeader.UpdateStipePaymentID(id, session.Id, session.PaymentIntentId);
+                _unitOfWork.OrderHeader.UpdateStatus(id, SD.OrderStatus.Approved, SD.PaymentStatus.Approved);
+                _unitOfWork.SaveChanges();
+            }
+        }
+
+        List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
+            .GetAll(x => x.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
+
+        _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+        _unitOfWork.SaveChanges();
+
+
         return View(id);
     }
 
