@@ -3,6 +3,7 @@ using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,9 @@ namespace BulkyBook.WebUI.Areas.Admin.Controllers;
 [Area("Admin")]
 public class OrderController : Controller
 {
+    [BindProperty]
+    public OrderVM OrderVM { get; set; }
+
     private readonly IUnitOfWork _unitOfWork;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -26,6 +30,45 @@ public class OrderController : Controller
         return View();
     }
 
+    public IActionResult Details(int orderId)
+    {
+        OrderVM = new OrderVM
+        {
+            OrderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == orderId, includeProperties: nameof(_unitOfWork.ApplicationUser)),
+            OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: nameof(_unitOfWork.Product))
+        };
+
+        return View(OrderVM);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = SD.Role.Admin + "," + SD.Role.Employee)]
+    public IActionResult UpdateOrderHeader()
+    {
+        var existingOrder = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id) ?? throw new Exception("Order now found.");
+
+        existingOrder.Name = OrderVM.OrderHeader.Name;
+        existingOrder.PhoneNumber = OrderVM.OrderHeader.PhoneNumber;
+        existingOrder.StreetAddress = OrderVM.OrderHeader.StreetAddress;
+        existingOrder.City = OrderVM.OrderHeader.City;
+        existingOrder.State = OrderVM.OrderHeader.State;
+        existingOrder.PostalCode = OrderVM.OrderHeader.PostalCode;
+
+        if (!string.IsNullOrEmpty(OrderVM.OrderHeader.Carrier))
+            existingOrder.Carrier = OrderVM.OrderHeader.Carrier;
+        if (!string.IsNullOrEmpty(OrderVM.OrderHeader.TrackingNumber))
+            existingOrder.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+
+
+        _unitOfWork.OrderHeader.Update(existingOrder);
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Order has been updated successfully.";
+
+        OrderVM.OrderHeader = existingOrder;
+
+        return RedirectToAction(nameof(Details), new { orderId = existingOrder.Id });
+    }
 
     #region API CALLS
 
