@@ -234,10 +234,30 @@
                                     </div>
                                 </li>
                             </ul>
-                            <input type="submit" class="btn btn-success form-control my-1" value="Pay Now" />
-                            <input type="submit" class="btn btn-primary form-control my-1" value="Start Processing" />
-                            <input type="submit" class="btn btn-primary form-control my-1" value="Ship Order" />
-                            <input type="submit" class="btn btn-danger form-control my-1" value="Cancel Order" />
+                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatus.DelayedPayment
+                            && Model.OrderHeader.OrderStatus == SD.OrderStatus.Shipped)
+                            {
+                                <input type="submit" class="btn btn-success form-control my-1" value="Pay Now" />
+                            }
+                            @if (User.IsInRole(SD.Role.Admin) || User.IsInRole(SD.Role.Employee))
+                            {
+                                if (Model.OrderHeader.OrderStatus == SD.OrderStatus.Approved)
+                                {
+                                    <input asp-action="StartProcessing" type="submit" class="btn btn-primary form-control my-1" value="Start Processing" />
+                                }
+                                if (Model.OrderHeader.OrderStatus == SD.OrderStatus.InProcess)
+                                {
+                                    <button asp-action="ShipOrder" type="submit" onclick="return validateShipOrder()" class="btn btn-primary form-control my-1">
+                                        Ship Order
+                                    </button>
+                                }
+                                if (Model.OrderHeader.OrderStatus != SD.OrderStatus.Refunded
+                                && Model.OrderHeader.OrderStatus != SD.OrderStatus.Shipped
+                                && Model.OrderHeader.OrderStatus != SD.OrderStatus.Cancelled)
+                                {
+                                    <input asp-action="CancelOrder" type="submit" class="btn btn-danger form-control my-1" value="Cancel Order" />
+                                }
+                            }
                         </div>
                     </div>
                 </div>
@@ -245,3 +265,30 @@
         </div>
     </div>
 </form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateShipOrder() {
+            if ($("#OrderHeader_Carrier").val() == "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter carrier.'
+                });
+                return false;
+            }
+            if ($("#OrderHeader_TrackingNumber").val() == "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter tracking number.'
+                });
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+}

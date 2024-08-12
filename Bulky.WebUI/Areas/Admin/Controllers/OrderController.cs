@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
 using BulkyBook.Models.ViewModels;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BulkyBook.WebUI.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize]
 public class OrderController : Controller
 {
     [BindProperty]
@@ -65,9 +67,40 @@ public class OrderController : Controller
 
         TempData["Success"] = "Order has been updated successfully.";
 
-        OrderVM.OrderHeader = existingOrder;
-
         return RedirectToAction(nameof(Details), new { orderId = existingOrder.Id });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = SD.Role.Admin + "," + SD.Role.Employee)]
+    public IActionResult StartProcessing()
+    {
+        _unitOfWork.OrderHeader.UpdateStatus(OrderVM.OrderHeader.Id, SD.OrderStatus.InProcess);
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Order has been updated successfully.";
+
+        return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = SD.Role.Admin + "," + SD.Role.Employee)]
+    public IActionResult ShipOrder()
+    {
+        var existingOrder = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id);
+        existingOrder.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+        existingOrder.Carrier = OrderVM.OrderHeader.Carrier;
+        existingOrder.OrderStatus = SD.OrderStatus.Shipped;
+        existingOrder.ShippingDate = DateTime.Now;
+
+        if (existingOrder.PaymentStatus == SD.PaymentStatus.DelayedPayment)
+            existingOrder.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+
+        _unitOfWork.OrderHeader.Update(existingOrder);
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Order has been shipped successfully.";
+
+        return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
     }
 
     #region API CALLS
@@ -75,8 +108,25 @@ public class OrderController : Controller
     [HttpGet]
     public IActionResult GetAll(string status)
     {
-        IEnumerable<OrderHeader> orderHeaders = _unitOfWork.OrderHeader
+        IEnumerable<OrderHeader> orderHeaders = new List<OrderHeader>();
+
+        if (User.IsInRole(SD.Role.Admin) || User.IsInRole(SD.Role.Employee))
+        {
+            orderHeaders = _unitOfWork.OrderHeader
             .GetAll(includeProperties: nameof(_unitOfWork.ApplicationUser));
+        }
+        else
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            if (claimsIdentity.IsAuthenticated == false)
+            {
+                return Json(new { data = orderHeaders });
+            }
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            orderHeaders = _unitOfWork.OrderHeader
+                .GetAll(x => x.ApplicationUserId == userId, includeProperties: nameof(_unitOfWork.ApplicationUser));
+        }
 
         switch (status)
         {
