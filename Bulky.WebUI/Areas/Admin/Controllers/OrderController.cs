@@ -1,11 +1,9 @@
-﻿using System.Diagnostics;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using BulkyBook.DataAccess.Abstracts;
 using BulkyBook.Models.Masters;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utilities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
