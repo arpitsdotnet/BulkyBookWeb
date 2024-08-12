@@ -33,4 +33,9 @@ public class SD
         public const string Refunded = "Refunded";
 
     }
+
+    public class Session
+    {
+        public const string ShoppingCart = "SessionShoppingCart";
+    }
 }

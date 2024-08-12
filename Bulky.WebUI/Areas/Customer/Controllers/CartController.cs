@@ -272,32 +272,34 @@ public class CartController : Controller
 
     public IActionResult Minus(int cartId)
     {
-        var existingCart = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId);
+        var existingCart = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId, tracked: true);
         try
         {
             existingCart.DecreaseCount(1);
+
+            _unitOfWork.ShoppingCart.Update(existingCart);
+            _unitOfWork.SaveChanges();
         }
         catch (ArgumentOutOfRangeException ex)
         {
+            HttpContext.Session.SetInt32(SD.Session.ShoppingCart, _unitOfWork.ShoppingCart.GetAll(u =>
+                    u.ApplicationUserId == existingCart.ApplicationUserId).Count() - 1);
+
             _unitOfWork.ShoppingCart.Remove(existingCart);
             _unitOfWork.SaveChanges();
-
-            TempData["Success"] = "Cart item has been removed successfully.";
-
-            return RedirectToAction(nameof(Index));
         }
-
-        _unitOfWork.ShoppingCart.Update(existingCart);
-        _unitOfWork.SaveChanges();
-
-        TempData["Success"] = "Item count has been decreased successfully.";
 
         return RedirectToAction(nameof(Index));
     }
 
     public IActionResult Remove(int cartId)
     {
-        var existingCart = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId);
+        // tracked: true: Enabling Tracking for Remove method to work,
+        // cause remove method force tracking to be lost.
+        ShoppingCart existingCart = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId, tracked: true);
+
+        HttpContext.Session.SetInt32(SD.Session.ShoppingCart, _unitOfWork.ShoppingCart.GetAll(u =>
+                u.ApplicationUserId == existingCart.ApplicationUserId).Count() - 1);
 
         _unitOfWork.ShoppingCart.Remove(existingCart);
         _unitOfWork.SaveChanges();
