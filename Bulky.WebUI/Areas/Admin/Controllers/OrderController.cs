@@ -7,6 +7,7 @@ using BulkyBook.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 
 namespace BulkyBook.WebUI.Areas.Admin.Controllers;
 
@@ -101,6 +102,37 @@ public class OrderController : Controller
         TempData["Success"] = "Order has been shipped successfully.";
 
         return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = SD.Role.Admin + "," + SD.Role.Employee)]
+    public IActionResult CancelOrder()
+    {
+        var existingOrder = _unitOfWork.OrderHeader.Get(x=>x.Id == OrderVM.OrderHeader.Id);
+
+        if (existingOrder.PaymentStatus == SD.PaymentStatus.Approved)
+        {
+            var options = new RefundCreateOptions
+            {
+                Reason = RefundReasons.RequestedByCustomer,
+                PaymentIntent = existingOrder.PaymentIntentId
+            };
+
+            var service = new RefundService();
+            Refund refund = service.Create(options);
+
+            _unitOfWork.OrderHeader.UpdateStatus(existingOrder.Id, SD.OrderStatus.Cancelled, SD.PaymentStatus.Refunded);
+        }
+        else
+        {
+            _unitOfWork.OrderHeader.UpdateStatus(existingOrder.Id, SD.OrderStatus.Cancelled, SD.OrderStatus.Cancelled);
+        }
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Order has been cancelled successfully.";
+
+        return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+
     }
 
     #region API CALLS
