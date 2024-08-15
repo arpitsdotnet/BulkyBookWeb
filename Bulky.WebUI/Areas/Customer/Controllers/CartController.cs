@@ -195,41 +195,6 @@ public class CartController : Controller
         return new StatusCodeResult(StatusCodes.Status303SeeOther);
     }
 
-
-    static Calculation CalculateTax(long orderAmount, string currency)
-    {
-        var calculationCreateOptions = new CalculationCreateOptions
-        {
-            Currency = currency,
-            CustomerDetails = new CalculationCustomerDetailsOptions
-            {
-                Address = new AddressOptions
-                {
-                    Line1 = "920 5th Ave",
-                    City = "Seattle",
-                    State = "WA",
-                    PostalCode = "98104",
-                    Country = "US",
-                },
-                AddressSource = "shipping",
-            },
-            LineItems = new List<CalculationLineItemOptions> {
-                 new() {
-                    Amount = orderAmount,
-                    Reference = "ProductRef",
-                    TaxBehavior ="exclusive",
-                    TaxCode = "txcd_30011000"
-                }
-            },
-            ShippingCost = new CalculationShippingCostOptions { Amount = 300, TaxBehavior = "exclusive" },
-        };
-
-        var calculationService = new CalculationService();
-        var calculation = calculationService.Create(calculationCreateOptions);
-
-        return calculation;
-    }
-
     public IActionResult OrderConfirmation(int id)
     {
         OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == id, includeProperties: nameof(_unitOfWork.ApplicationUser));
@@ -245,6 +210,8 @@ public class CartController : Controller
                 _unitOfWork.OrderHeader.UpdateStatus(id, SD.OrderStatus.Approved, SD.PaymentStatus.Approved);
                 _unitOfWork.SaveChanges();
             }
+
+            HttpContext.Session.Remove(SD.Session.ShoppingCart);
         }
 
         List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
@@ -307,6 +274,41 @@ public class CartController : Controller
         TempData["Success"] = "Cart item has been removed successfully.";
 
         return RedirectToAction(nameof(Index));
+    }
+
+
+    private static Calculation CalculateTax(long orderAmount, string currency)
+    {
+        var calculationCreateOptions = new CalculationCreateOptions
+        {
+            Currency = currency,
+            CustomerDetails = new CalculationCustomerDetailsOptions
+            {
+                Address = new AddressOptions
+                {
+                    Line1 = "920 5th Ave",
+                    City = "Seattle",
+                    State = "WA",
+                    PostalCode = "98104",
+                    Country = "US",
+                },
+                AddressSource = "shipping",
+            },
+            LineItems = new List<CalculationLineItemOptions> {
+                 new() {
+                    Amount = orderAmount,
+                    Reference = "ProductRef",
+                    TaxBehavior ="exclusive",
+                    TaxCode = "txcd_30011000"
+                }
+            },
+            ShippingCost = new CalculationShippingCostOptions { Amount = 300, TaxBehavior = "exclusive" },
+        };
+
+        var calculationService = new CalculationService();
+        var calculation = calculationService.Create(calculationCreateOptions);
+
+        return calculation;
     }
 
 }

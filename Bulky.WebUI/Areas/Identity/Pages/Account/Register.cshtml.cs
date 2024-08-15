@@ -215,7 +215,13 @@ namespace BulkyBook.WebUI.Areas.Identity.Pages.Account
                 return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            if (!User.IsInRole(SD.Role.Admin))
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
+
+            TempData["Success"] = "New user created successfully.";
+
             return LocalRedirect(returnUrl);
         }
 
