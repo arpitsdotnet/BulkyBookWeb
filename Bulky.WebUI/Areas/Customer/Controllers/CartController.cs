@@ -139,8 +139,7 @@ public class CartController : Controller
         //Regular customer account and capture payment via stripe pg
         //Work To Do
 
-        var domain = "https://localhost:44331/";
-
+        var domain = $"{Request.Scheme}://{Request.Host.Value}/";
 
         var customerOptions = new CustomerCreateOptions
         {
