@@ -12,7 +12,7 @@ namespace BulkyBook.WebUI.Areas.Admin.Controllers.Masters;
 [Authorize(Roles = SD.Role.Admin)]
 public class ProductController : Controller
 {
-    private const string Product_Image_Path = @"images\products";
+    private const string Product_Image_Path = @"images\products\product-{0}";
     private readonly IUnitOfWork _unitOfWork;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -58,7 +58,7 @@ public class ProductController : Controller
     }
 
     [HttpPost]
-    public IActionResult Upsert(ProductVM productVM, IFormFile? file)
+    public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files)
     {
         //Check for Model Validations.
         if (!ModelState.IsValid)
@@ -89,7 +89,6 @@ public class ProductController : Controller
             return View(productVM);
         }
 
-        //productVM.Product.ImageUrl = UploadImage(file, Product_Image_Path, productVM.Product.ImageUrl);
 
         if (productVM.Product.Id == 0)
             _unitOfWork.Product.Add(productVM.Product);
@@ -98,9 +97,64 @@ public class ProductController : Controller
 
         _unitOfWork.SaveChanges();
 
+        if (files != null)
+        {
+            List<ProductImage> productImages = new List<ProductImage>();
+            foreach (var file in files)
+            {
+                var imagePath = string.Format(Product_Image_Path, productVM.Product.Id);
+
+                ProductImage productImage = new ProductImage()
+                {
+                    ImageUrl = UploadImages(file, imagePath),
+                    ProductId = productVM.Product.Id,
+                };
+                productImages.Add(productImage);
+
+                //_unitOfWork.ProductImage.Update(productImage);
+            }
+
+            productVM.Product.ProductImages = productImages;
+
+            _unitOfWork.Product.Update(productVM.Product);
+            _unitOfWork.SaveChanges();
+        }
+
+        //productVM.Product.ImageUrl = UploadImage(file, Product_Image_Path, productVM.Product.ImageUrl);
+
+
         TempData["Success"] = "Product saved successfully.";
 
         return RedirectToAction("Index");
+    }
+
+    private string UploadImages(IFormFile? file, string imagePath, string? existingImageUrl = null)
+    {
+        if (file == null)
+            return string.Empty;
+
+        string wwwRootPath = _webHostEnvironment.WebRootPath;
+        if (!string.IsNullOrEmpty(existingImageUrl))
+        {
+            //delete the old image
+            var oldImagePath = Path.Combine(wwwRootPath, existingImageUrl.TrimStart('\\'));
+            if (System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+        }
+
+        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var productPath = Path.Combine(wwwRootPath, imagePath);
+
+        if (!Directory.Exists(productPath))
+            Directory.CreateDirectory(productPath);
+
+        using var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create);
+
+        file.CopyTo(fileStream);
+
+        return Path.Combine(@"\", imagePath, fileName);
     }
 
     private string UploadImage(IFormFile? file, string imagePath, string? existingImageUrl = null)
