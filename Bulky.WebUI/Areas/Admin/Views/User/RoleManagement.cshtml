@@ -1,0 +1,60 @@
+﻿@model RoleManagementVM
+
+<form method="post">
+    <div class="container">
+        <div class="row pt-4 pb-3">
+            <div class="col-6">
+                <h2 class="text-primary">Manage User Role</h2>
+            </div>
+            <div class="col-6 text-end">
+            </div>
+        </div>
+        <div asp-validation-summary="All"></div>
+    </div>
+    <input asp-for="User.Id" hidden />
+    <div class="mb-3 row">
+        <label asp-for="User.Name" class="p-0"></label>
+        <input asp-for="User.Name" readonly class="form-control" />
+    </div>
+    <div class="mb-3 row">
+        <label asp-for="User.Role" class="p-0"></label>
+        <select asp-for="User.Role" asp-items="@Model.RoleList" class="form-select"></select>
+        <span asp-validation-for="User.Role" class="text-danger"></span>
+    </div>
+    @{
+        var companyVisible = "display:none;";
+        
+    }
+    @if(Model.User.Role == SD.Role.Company)
+    {
+        companyVisible = "display:block";
+    }
+    <div class="mb-3 row" style="@companyVisible" id="Div_User_CompanyId">
+        <label asp-for="User.CompanyId" class="p-0"></label>
+        <select asp-for="User.CompanyId" asp-items="@Model.CompanyList" class="form-select"></select>
+        <span asp-validation-for="User.CompanyId" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <div class="col-6 col-md-3">
+            <button type="submit" class="btn btn-primary form-control">Update Role</button>
+        </div>
+        <div class="col-6 col-md-3">
+            <a asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#User_Role").change(function () {
+                var selection = $('#User_Role option:selected').text();
+                $("#Div_User_CompanyId").hide();
+                if (selection == "Company") {
+                    $("#Div_User_CompanyId").show();
+                }
+            });
+        });
+    </script>
+}

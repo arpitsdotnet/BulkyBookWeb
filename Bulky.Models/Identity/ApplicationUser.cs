@@ -15,6 +15,7 @@ public class ApplicationUser : IdentityUser
     public string? State { get; set; }
     public string? PostalCode { get; set; }
 
+    [Display(Name = "Company")]
     public int? CompanyId { get; set; }
 
     [ForeignKey(nameof(CompanyId))]

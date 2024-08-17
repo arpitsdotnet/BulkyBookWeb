@@ -22,24 +22,26 @@ function loadDataTable() {
                     var today = new Date().getTime();
                     var lockout = new Date(data.lockoutEnd).getTime();
 
+                    var permissionButton =
+                        `<a href="/admin/user/RoleManagement?userId=${data.id}" class="btn btn-success mx-2">
+                            <i class="bi bi-pencil-square"></i>&nbsp;Permission
+                        </a>`
+
+                    var lockUnlockButton =
+                        `<a onclick="DoLockUnlock('${data.id}','Lock')" class="btn btn-primary mx-2">
+                            <i class="bi bi-unlock-fill"></i>&nbsp;Unlock
+                        </a>`;
+
                     if (lockout > today) {
-                        return `<div class="w-75 btn-group" role="group">
-                            <a onclick="DoLockUnlock('${data.id}','Unlock')" class="btn btn-danger mx-2">
+                        lockUnlockButton =
+                            `<a onclick="DoLockUnlock('${data.id}','Unlock')" class="btn btn-danger mx-2">
                                 <i class="bi bi-lock-fill"></i>&nbsp;Lock
-                            </a>
-                            <a href="/admin/user/upsert?id=${data.id}" class="btn btn-success mx-2">
-                                <i class="bi bi-pencil-square"></i>&nbsp;Permission
-                            </a>
-                        </div>`
+                            </a>`;
                     }
 
                     return `<div class="w-75 btn-group" role="group">
-                        <a onclick="DoLockUnlock('${data.id}','Lock')" class="btn btn-primary mx-2">
-                            <i class="bi bi-unlock-fill"></i>&nbsp;Unlock
-                        </a>
-                        <a href="/admin/user/upsert?id=${data.id}" class="btn btn-success mx-2">
-                            <i class="bi bi-pencil-square"></i>&nbsp;Permission
-                        </a>
+                        ${lockUnlockButton}
+                        ${permissionButton}
                     </div>`
                 }
             },
