@@ -68,9 +68,20 @@
                 <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
             </div>
         </div>
-        @* <div class="col-2">
-            <img src="@Model.Product.ImageUrl" width="100%" style="border-radius:5px border: solid 1px #bbb9b9" />
-        </div> *@
+        <div class="col-2">
+            @if(Model.Product.ProductImages != null)
+            {
+                foreach (var image in Model.Product.ProductImages)
+                {
+                    <div class="border p-1 mb-2 text-center">
+                        <img src="@image.ImageUrl" width="100%" style="border-radius:5px border: solid 1px #bbb9b9" />
+                        <a asp-action="DeleteImage" asp-route-imageId="@image.Id" class="btn btn-danger" >
+                            <i class="bi bi-trash-fill"></i>&nbsp;Delete
+                        </a>
+                    </div>
+                }
+            }
+        </div>
     </div>
     <div class="row">
         <div class="col-6 col-md-3">

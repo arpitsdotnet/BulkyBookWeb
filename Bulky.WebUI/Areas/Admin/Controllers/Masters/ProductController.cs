@@ -53,7 +53,7 @@ public class ProductController : Controller
 
         //update
         productVM.Product = _unitOfWork.Product
-            .Get(x => x.Id == id);
+            .Get(x => x.Id == id, includeProperties: "ProductImages");
         return View(productVM);
     }
 
@@ -181,6 +181,37 @@ public class ProductController : Controller
         file.CopyTo(fileStream);
 
         return Path.Combine(@"\", imagePath, fileName);
+    }
+
+    public IActionResult DeleteImage(int imageId)
+    {
+        var imageToBeDeleted = _unitOfWork.ProductImage.Get(x => x.Id == imageId);
+        var productId = imageToBeDeleted.ProductId;
+
+        if (imageToBeDeleted == null)
+        {
+            TempData["Error"] = "Unable to delete image. Image data not found.";
+
+            return RedirectToAction(nameof(Upsert), new { id = productId });
+        }
+
+        if (string.IsNullOrEmpty(imageToBeDeleted.ImageUrl) == false)
+        {
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+            //delete the old image
+            var oldImagePath = Path.Combine(wwwRootPath, imageToBeDeleted.ImageUrl.TrimStart('\\'));
+            if (System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+        }
+
+        _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+        _unitOfWork.SaveChanges();
+
+        TempData["Success"] = "Image deleted successfully.";
+
+        return RedirectToAction(nameof(Upsert), new { id = productId });
     }
 
     //public IActionResult Create()
@@ -320,17 +351,14 @@ public class ProductController : Controller
         if (product == null)
             return Json(new { success = false, message = "Error while deleting, product id not found." });
 
-        //var oldImageUrl = product.ImageUrl;
-        //if (!string.IsNullOrEmpty(oldImageUrl))
-        //{
-        //    string wwwRootPath = _webHostEnvironment.WebRootPath;
-        //    //delete the old image
-        //    var oldImagePath = Path.Combine(wwwRootPath, oldImageUrl.TrimStart('\\'));
-        //    if (System.IO.File.Exists(oldImagePath))
-        //    {
-        //        System.IO.File.Delete(oldImagePath);
-        //    }
-        //}
+
+        string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+        var imagePath = string.Format(Product_Image_Path, id);
+        var productPath = Path.Combine(wwwRootPath, imagePath);
+
+        if (Directory.Exists(productPath))
+            Directory.Delete(productPath, true);
 
         _unitOfWork.Product.Remove(product);
         _unitOfWork.SaveChanges();
