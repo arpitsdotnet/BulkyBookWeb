@@ -89,7 +89,7 @@ public class ProductController : Controller
             return View(productVM);
         }
 
-        productVM.Product.ImageUrl = UploadImage(file, Product_Image_Path, productVM.Product.ImageUrl);
+        //productVM.Product.ImageUrl = UploadImage(file, Product_Image_Path, productVM.Product.ImageUrl);
 
         if (productVM.Product.Id == 0)
             _unitOfWork.Product.Add(productVM.Product);
@@ -266,17 +266,17 @@ public class ProductController : Controller
         if (product == null)
             return Json(new { success = false, message = "Error while deleting, product id not found." });
 
-        var oldImageUrl = product.ImageUrl;
-        if (!string.IsNullOrEmpty(oldImageUrl))
-        {
-            string wwwRootPath = _webHostEnvironment.WebRootPath;
-            //delete the old image
-            var oldImagePath = Path.Combine(wwwRootPath, oldImageUrl.TrimStart('\\'));
-            if (System.IO.File.Exists(oldImagePath))
-            {
-                System.IO.File.Delete(oldImagePath);
-            }
-        }
+        //var oldImageUrl = product.ImageUrl;
+        //if (!string.IsNullOrEmpty(oldImageUrl))
+        //{
+        //    string wwwRootPath = _webHostEnvironment.WebRootPath;
+        //    //delete the old image
+        //    var oldImagePath = Path.Combine(wwwRootPath, oldImageUrl.TrimStart('\\'));
+        //    if (System.IO.File.Exists(oldImagePath))
+        //    {
+        //        System.IO.File.Delete(oldImagePath);
+        //    }
+        //}
 
         _unitOfWork.Product.Remove(product);
         _unitOfWork.SaveChanges();
