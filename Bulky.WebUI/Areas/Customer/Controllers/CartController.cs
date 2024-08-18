@@ -40,8 +40,15 @@ public class CartController : Controller
         {
             ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(u =>
                                     u.ApplicationUserId == userId,
-                                    includeProperties: nameof(_unitOfWork.Product))
+                                    includeProperties: "Product")
         };
+
+        IEnumerable<ProductImage> productImages = _unitOfWork.ProductImage.GetAll();
+
+        foreach (var cartItem in ShoppingCartVM.ShoppingCartList)
+        {
+            cartItem.Product.ProductImages = productImages.Where(x => x.ProductId == cartItem.Product.Id).ToList();
+        }
 
         ShoppingCartVM.OrderHeader.OrderTotal = ShoppingCartVM.ShoppingCartList.Sum(x => x.GetTotalPriceBasedOnQuantity());
 

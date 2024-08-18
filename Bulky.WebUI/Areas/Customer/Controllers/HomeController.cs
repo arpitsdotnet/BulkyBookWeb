@@ -5,7 +5,6 @@ using BulkyBook.Models.Masters;
 using BulkyBook.Utilities;
 using BulkyBook.WebUI.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BulkyBook.WebUI.Areas.Customer.Controllers;
@@ -30,20 +29,20 @@ public class HomeController : Controller
         var claimsIdentity = (ClaimsIdentity)User.Identity;
         var userIdClaim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
-        if(userIdClaim != null)
+        if (userIdClaim != null)
         {
             HttpContext.Session.SetInt32(SD.Session.ShoppingCart, _unitOfWork.ShoppingCart.GetAll(u =>
                 u.ApplicationUserId == userIdClaim.Value).Count());
         }
 
-        var products = _unitOfWork.Product.GetAll(includeProperties: nameof(_unitOfWork.Category));
+        var products = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
 
         return View(products);
     }
 
     public IActionResult Details(int productId)
     {
-        var product = _unitOfWork.Product.Get(u => u.Id == productId, nameof(_unitOfWork.Category));
+        var product = _unitOfWork.Product.Get(u => u.Id == productId, "Category,ProductImages");
 
         if (product == null)
         {
@@ -70,13 +69,13 @@ public class HomeController : Controller
 
         shoppingCart.ApplicationUserId = userId;
 
-        ShoppingCart existingCart = _unitOfWork.ShoppingCart.Get(u => 
-            u.ApplicationUserId == userId && 
+        ShoppingCart existingCart = _unitOfWork.ShoppingCart.Get(u =>
+            u.ApplicationUserId == userId &&
             u.ProductId == shoppingCart.ProductId);
 
         if (existingCart != null)
         {
-            
+
             existingCart.IncreaseCount(shoppingCart.Count);
 
             _unitOfWork.ShoppingCart.Update(existingCart);
